@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dca2ih3orhwg5"]
+
+[ext_resource type="Script" path="res://spacetime_db.gd" id="1_p3u3q"]
+
+[node name="SpacetimeDB" type="Node"]
+script = ExtResource("1_p3u3q")

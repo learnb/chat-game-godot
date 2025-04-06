@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://c4fd2anlkbw21"]
+
+[ext_resource type="Script" path="res://test_scene.gd" id="1_x50yu"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mh0fd"]
+albedo_color = Color(0.670588, 0.541176, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_s51y4"]
+material = SubResource("StandardMaterial3D_mh0fd")
+size = Vector3(10, 10, 1)
+
+[node name="TestScene" type="Node3D"]
+script = ExtResource("1_x50yu")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_s51y4")
