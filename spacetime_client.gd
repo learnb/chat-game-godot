@@ -61,15 +61,37 @@ func websocket_init() -> void:
 	print("Socket request complete.")
 
 
-## Sends a subscription request to the SpacetimeDB Server.
+## Sends a Subscribe request to the SpacetimeDB Server.
 ##
 ## Creates a subscription message for all tables defined in the `table_names` export array, then sends it to the server.
-func subscribe() -> void:
+func subscribe() -> int:
+	var request_id: int = randi() % (1 << 32)
+	var queries: Array = table_names.map(func(t): return "SELECT * FROM %s" % [t])	
 	var subscribeMessage: Dictionary = {
 		"Subscribe": {
-			"query_strings": table_names.map(func(t): return "SELECT * FROM %s" % [t]),
-			"request_id": 420
+			"query_strings": queries,	# list of SQL queries to subscribe to.
+			"request_id": request_id 	# server will include the same ID in the `TransactionUpdate` response.
 		}
 	}
 	var msgString: String = JSON.stringify(subscribeMessage)
+	print("Sending message: %s" % [msgString])
 	socket.send_text(msgString)
+	return request_id
+
+## Sends a CallReducer request to the SpacetimeDB Server.
+##
+## Creates a CallReducer message for the reducer spefied in the `reducer` argument, then sends it to the server.
+func callReducer(reducer: String, args: String) -> int:
+	var request_id: int = randi() % (1 << 32)
+	var callReducerMessage: Dictionary = {
+		"CallReducer": {
+			"reducer": reducer, 		# name of the reducer to call.
+			"args": args,				# arguments to the reducer.
+			"request_id": request_id,	# server will include the same ID in the `TransactionUpdate` response.
+			"flags": 0					# 0 or 1; 1 means the caller does not want to be notified about the reducer without being subscribed.
+		}
+	}
+	var msgString: String = JSON.stringify(callReducerMessage)
+	print("Sending message: %s" % [msgString])
+	socket.send_text(msgString)
+	return request_id
