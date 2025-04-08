@@ -19,5 +19,6 @@ func _on_message_entered(text: String) -> void:
 
 func render_message(username: String, text: String) -> void:
 	var msg: String = "\n[%s] %s" % [username, text]
-	chatLog.add_text(msg)
+	chatLog.add_text(msg) # render message
+	chatLog.scroll_to_line(chatLog.get_line_count() - 1) # scroll to bottom
 	inputField.text = '' # clear input field
