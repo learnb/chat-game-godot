@@ -20,9 +20,11 @@ func _on_stdb_socket_closed() -> void:
 	pass
 
 func _on_stdb_new_message(msg: Variant) -> void:
-	# TODO process messages
 	parseStdbMessage(msg)
-	#ChatBox.send_message("", msg)
+
+func send_chat_message(username: String, text: String) -> void:
+	var argData = JSON.stringify([username, text])
+	stdbClient.callReducer("AddChatMessage", argData)
 
 func parseStdbMessage(msg: PackedByteArray) -> void:
 	print("Server message: %s" % [msg.get_string_from_utf8()])
@@ -36,7 +38,21 @@ func parseStdbMessage(msg: PackedByteArray) -> void:
 			stdbClient.subscribe()
 		elif key == "InitialSubscription":
 			print("Received %s" % [key])
-			var updates = item.database_update.tables[0].updates
+			parseInitialSubscription(item)
+		elif key == "TransactionUpdate":
+			print("Received %s" % [key])
+			parseTransactionUpdate(item)
+		else:
+			print("Unhandled message type: %s" % [key])
+
+func parseInitialSubscription(data) -> void:
+	var tables = data.database_update.tables
+	for table in tables:
+		print("processing table: %s" % [table])
+		if table.table_name not in ["ChatMessages", "Players"]:
+			continue
+		if table.table_name == "ChatMessages":
+			var updates = table.updates
 			for update in updates:
 				var inserts = update.inserts
 				for insert in inserts:
@@ -44,9 +60,18 @@ func parseStdbMessage(msg: PackedByteArray) -> void:
 					print("row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatBox.render_message("", chatMessage)
-		elif key == "TransactionUpdate":
-			print("Received %s" % [key])
-			var updates = item.status.Committed.tables[0].updates
+		if table.table_name == "Players":
+			pass
+
+
+func parseTransactionUpdate(data) -> void:
+	var tables = data.status.Committed.tables
+	for table in tables:
+		print("processing table: %s" % [table])
+		if table.table_name not in ["ChatMessages", "Players"]:
+			continue
+		if table.table_name == "ChatMessages":
+			var updates = table.updates
 			for update in updates:
 				var inserts = update.inserts
 				for insert in inserts:
@@ -60,9 +85,5 @@ func parseStdbMessage(msg: PackedByteArray) -> void:
 					print("row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatBox.render_message("", chatMessage)
-		else:
-			print("Unhandled message type: %s" % [key])
-
-func send_chat_message(username: String, text: String) -> void:
-	var argData = JSON.stringify([username, text])
-	stdbClient.callReducer("AddChatMessage", argData)
+		if table.table_name == "Players":
+			pass
