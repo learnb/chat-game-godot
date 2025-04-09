@@ -10,6 +10,9 @@ var isSocketOpen: bool		# Mutex lock for processing socket messages
 signal websocket_open
 signal websocket_closed
 signal new_message(msg: PackedByteArray)
+signal initial_subscription(data: Dictionary)
+signal transaction_update(data: Dictionary)
+signal identity_token(data: Dictionary)
 
 func _ready():
 	websocket_init()
@@ -29,6 +32,7 @@ func _process(delta: float) -> void:
 			
 			# Process messages
 			while socket.get_available_packet_count():
+				process_message(socket.get_packet())
 				new_message.emit(socket.get_packet())
 		WebSocketPeer.STATE_CLOSING:
 			print("WebSocket Closing")
@@ -95,3 +99,36 @@ func callReducer(reducer: String, args: String) -> int:
 	print("Sending message: %s" % [msgString])
 	socket.send_text(msgString)
 	return request_id
+
+func process_message(msg: PackedByteArray) -> void:
+	var json = JSON.parse_string(msg.get_string_from_utf8())
+	assert(json != null)
+	
+	for key in json:
+		var item = json.get(key)
+		if key == "IdentityToken":
+			print("Received %s" % [key])
+			identity_token.emit(item)
+		elif key == "InitialSubscription":
+			print("Received %s" % [key])
+			var data: Dictionary = {}
+			for table in item.database_update.tables:
+				for update in table.updates:
+					for delete in update.deletes:
+						data[table.table_name]["delete"] = JSON.parse_string(delete)
+					for insert in update.inserts:
+						data[table.table_name]["insert"] = JSON.parse_string(insert)
+			initial_subscription.emit(data)
+
+		elif key == "TransactionUpdate":
+			print("Received %s" % [key])
+			var data: Dictionary = {}
+			for table in item.status.Committed.tables:
+				for update in table.updates:
+					for delete in update.deletes:
+						data[table.table_name]["delete"] = JSON.parse_string(delete)
+					for insert in update.inserts:
+						data[table.table_name]["insert"] = JSON.parse_string(insert)
+			transaction_update.emit(item)
+		else:
+			print("Unhandled message type: %s" % [key])
