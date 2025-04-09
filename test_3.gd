@@ -61,7 +61,21 @@ func parseInitialSubscription(data) -> void:
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatBox.render_message("", chatMessage)
 		if table.table_name == "Players":
-			pass
+			var updates = table.updates
+			for update in updates:
+				var inserts = update.inserts
+				for insert in inserts:
+					var row = JSON.parse_string(insert)
+					print("row: %s" % [row])
+					var playerData = {
+						"PlayerId": row.PlayerId,
+						"Identity": row.Identity,
+						"AvatarConfig": row.AvatarConfig,
+						"Position": row.Position,
+						"Rotation": row.Rotation,
+						"IsOnline": row.IsOnline
+					}
+					print("playerData: %s" % [playerData])
 
 
 func parseTransactionUpdate(data) -> void:
@@ -86,4 +100,17 @@ func parseTransactionUpdate(data) -> void:
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatBox.render_message("", chatMessage)
 		if table.table_name == "Players":
-			pass
+			var updates = table.updates
+			for update in updates:
+				var inserts = update.inserts
+				for insert in inserts:
+					var messageArray = JSON.parse_string(insert)
+					var playerData = {
+						"PlayerId": messageArray[0],
+						"Identity": messageArray[1],
+						"AvatarConfig": messageArray[2],
+						"Position": messageArray[3],
+						"Rotation": messageArray[4],
+						"IsOnline": messageArray[5]
+					}
+					print("playerData: %s" % [playerData])
