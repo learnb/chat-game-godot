@@ -11,7 +11,6 @@ func _ready() -> void:
 	stdbClient.connect("new_message", _on_stdb_new_message)
 	ChatUI.connect("send_message", send_chat_message)
 
-
 func _process(delta: float) -> void:
 	pass
 
@@ -46,6 +45,7 @@ func parseStdbMessage(msg: PackedByteArray) -> void:
 			parseTransactionUpdate(item)
 		else:
 			print("Unhandled message type: %s" % [key])
+	render_player_list()
 
 func parseInitialSubscription(data) -> void:
 	var tables = data.database_update.tables
@@ -59,7 +59,7 @@ func parseInitialSubscription(data) -> void:
 				var inserts = update.inserts
 				for insert in inserts:
 					var row = JSON.parse_string(insert)
-					print("row: %s" % [row])
+					print("insert row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatUI.render_message("", chatMessage)
 		if table.table_name == "Players":
@@ -68,7 +68,7 @@ func parseInitialSubscription(data) -> void:
 				var inserts = update.inserts
 				for insert in inserts:
 					var row = JSON.parse_string(insert)
-					print("row: %s" % [row])
+					print("insert row: %s" % [row])
 					var playerData = {
 						"PlayerId": row.PlayerId,
 						"Identity": row.Identity,
@@ -78,8 +78,7 @@ func parseInitialSubscription(data) -> void:
 						"IsOnline": row.IsOnline
 					}
 					print("playerData: %s" % [playerData])
-					update_player_state(playerData)
-
+					insert_player(playerData)
 
 func parseTransactionUpdate(data) -> void:
 	var tables = data.status.Committed.tables
@@ -99,12 +98,25 @@ func parseTransactionUpdate(data) -> void:
 						"Message": messageArray[2],
 						"Timestamp": messageArray[3]
 					}
-					print("row: %s" % [row])
+					print("insert row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
 					ChatUI.render_message("", chatMessage)
 		if table.table_name == "Players":
 			var updates = table.updates
 			for update in updates:
+				var deletes = update.deletes
+				for delete in deletes:
+					var messageArray = JSON.parse_string(delete)
+					var playerData = {
+						"PlayerId": messageArray[0],
+						"Identity": messageArray[1],
+						"AvatarConfig": messageArray[2],
+						"Position": messageArray[3],
+						"Rotation": messageArray[4],
+						"IsOnline": messageArray[5]
+					}
+					print("delete playerData: %s" % [playerData])
+					delete_player(playerData)
 				var inserts = update.inserts
 				for insert in inserts:
 					var messageArray = JSON.parse_string(insert)
@@ -116,11 +128,21 @@ func parseTransactionUpdate(data) -> void:
 						"Rotation": messageArray[4],
 						"IsOnline": messageArray[5]
 					}
-					print("playerData: %s" % [playerData])
-					update_player_state(playerData)
+					print("insert playerData: %s" % [playerData])
+					insert_player(playerData)	
 
-func update_player_state(playerData) -> void:
+func update_player(playerData) -> void:
 	playerMap[playerData.PlayerId] = playerData
+	if !playerData.isOnline:
+		playerMap.erase(playerData.PlayerId)
+
+func insert_player(playerData) -> void:
+	playerMap[playerData.PlayerId] = playerData
+
+func delete_player(playerData) -> void:
+	playerMap.erase(playerData.PlayerId)
+
+func render_player_list() -> void:
 	var playerList: Array[String] = []
 	for playerId in playerMap:
 		playerList.append(playerMap[playerId].Identity)

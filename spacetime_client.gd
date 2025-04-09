@@ -25,11 +25,11 @@ func _process(delta: float) -> void:
 			if !isSocketOpen:
 				isSocketOpen = true
 				print("WebSocket Open")
-				emit_signal("websocket_open")
+				websocket_open.emit()
 			
 			# Process messages
 			while socket.get_available_packet_count():
-				emit_signal("new_message", socket.get_packet())
+				new_message.emit(socket.get_packet())
 		WebSocketPeer.STATE_CLOSING:
 			print("WebSocket Closing")
 		WebSocketPeer.STATE_CLOSED:
@@ -38,7 +38,7 @@ func _process(delta: float) -> void:
 				isSocketOpen = false
 				var code = socket.get_close_code()
 				print("WebSocket Closed with code: %d, Clean: %s" % [code, code != -1])
-				emit_signal("websocket_closed")
+				websocket_closed.emit()
 	
 ## Initializes the WebSocket connection to the SpacetimeDB server.
 ##
