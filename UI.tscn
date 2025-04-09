@@ -2,26 +2,58 @@
 
 [ext_resource type="Script" path="res://ui.gd" id="1_f50eq"]
 
-[node name="ChatBox" type="Control"]
+[node name="ChatUI" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
 script = ExtResource("1_f50eq")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 0
-offset_right = 1135.0
-offset_bottom = 631.0
+[node name="ChatBoxContainer" type="VBoxContainer" parent="."]
+layout_direction = 1
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -600.0
+offset_top = -400.0
+grow_horizontal = 0
+grow_vertical = 0
 
-[node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer"]
+[node name="RichTextLabel" type="RichTextLabel" parent="ChatBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="ChatBoxContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label" type="Label" parent="ChatBoxContainer/HBoxContainer"]
 layout_mode = 2
 
-[node name="LineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+[node name="LineEdit" type="LineEdit" parent="ChatBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="PlayerListContainer" type="VBoxContainer" parent="."]
+layout_direction = 1
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1000.0
+offset_top = -400.0
+offset_right = -600.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="PlayerListContainer"]
+layout_mode = 2
+size_flags_vertical = 3

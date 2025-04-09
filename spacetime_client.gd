@@ -5,7 +5,7 @@ extends Node
 @export var table_names: Array[String] = []
 
 var socket: WebSocketPeer
-var isSocketOpen: bool
+var isSocketOpen: bool		# Mutex lock for processing socket messages
 
 signal websocket_open
 signal websocket_closed

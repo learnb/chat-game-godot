@@ -1,13 +1,15 @@
 extends Node3D
 
-@onready var ChatBox = $ChatBox
+@onready var ChatUI = $ChatUI
 @onready var stdbClient = $Spacetime_Client
+
+var playerMap: Dictionary = {}
 
 func _ready() -> void:
 	stdbClient.connect("websocket_open", _on_stdb_socket_open)
 	stdbClient.connect("websocket_closed", _on_stdb_socket_closed)
 	stdbClient.connect("new_message", _on_stdb_new_message)
-	ChatBox.connect("send_message", send_chat_message)
+	ChatUI.connect("send_message", send_chat_message)
 
 
 func _process(delta: float) -> void:
@@ -59,7 +61,7 @@ func parseInitialSubscription(data) -> void:
 					var row = JSON.parse_string(insert)
 					print("row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
-					ChatBox.render_message("", chatMessage)
+					ChatUI.render_message("", chatMessage)
 		if table.table_name == "Players":
 			var updates = table.updates
 			for update in updates:
@@ -76,6 +78,7 @@ func parseInitialSubscription(data) -> void:
 						"IsOnline": row.IsOnline
 					}
 					print("playerData: %s" % [playerData])
+					update_player_state(playerData)
 
 
 func parseTransactionUpdate(data) -> void:
@@ -98,7 +101,7 @@ func parseTransactionUpdate(data) -> void:
 					}
 					print("row: %s" % [row])
 					var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
-					ChatBox.render_message("", chatMessage)
+					ChatUI.render_message("", chatMessage)
 		if table.table_name == "Players":
 			var updates = table.updates
 			for update in updates:
@@ -114,3 +117,11 @@ func parseTransactionUpdate(data) -> void:
 						"IsOnline": messageArray[5]
 					}
 					print("playerData: %s" % [playerData])
+					update_player_state(playerData)
+
+func update_player_state(playerData) -> void:
+	playerMap[playerData.PlayerId] = playerData
+	var playerList: Array[String] = []
+	for playerId in playerMap:
+		playerList.append(playerMap[playerId].Identity)
+	ChatUI.render_player_list(playerList)

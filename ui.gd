@@ -1,8 +1,10 @@
 extends Control
 
-@onready var chatLog = $VBoxContainer/RichTextLabel
-@onready var inputLabel = $VBoxContainer/HBoxContainer/Label
-@onready var inputField = $VBoxContainer/HBoxContainer/LineEdit
+@onready var chatLog = $ChatBoxContainer/RichTextLabel
+@onready var inputLabel = $ChatBoxContainer/HBoxContainer/Label
+@onready var inputField = $ChatBoxContainer/HBoxContainer/LineEdit
+
+@onready var playerList = $PlayerListContainer/RichTextLabel
 
 var username = "🐿"
 
@@ -22,3 +24,9 @@ func render_message(username: String, text: String) -> void:
 	chatLog.add_text(msg) # render message
 	chatLog.scroll_to_line(chatLog.get_line_count() - 1) # scroll to bottom
 	inputField.text = '' # clear input field
+
+func render_player_list(players: Array) -> void:
+	playerList.clear()
+	for player in players:
+		playerList.add_text("\n%s" % player)
+	playerList.scroll_to_line(playerList.get_line_count() - 1)

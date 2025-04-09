@@ -33,7 +33,7 @@ environment = SubResource("Environment_hdwfq")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_tp0wi")
 
-[node name="ChatBox" parent="." instance=ExtResource("2_g7yjj")]
+[node name="ChatUI" parent="." instance=ExtResource("2_g7yjj")]
 
 [node name="Spacetime_Client" parent="." instance=ExtResource("3_8ygtv")]
 host_url = "wss://spacetime.bryanlearn.com"
