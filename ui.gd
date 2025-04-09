@@ -30,3 +30,7 @@ func render_player_list(players: Array) -> void:
 	for player in players:
 		playerList.add_text("\n%s" % player)
 	playerList.scroll_to_line(playerList.get_line_count() - 1)
+
+func set_username(name: String) -> void:
+	username = name
+	inputLabel.text = username

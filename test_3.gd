@@ -3,6 +3,8 @@ extends Node3D
 @onready var ChatUI = $ChatUI
 @onready var stdbClient = $Spacetime_Client
 
+var username: String
+
 var playerMap: Dictionary = {}
 
 func _ready() -> void:
@@ -12,8 +14,10 @@ func _ready() -> void:
 	stdbClient.connect("initial_subscription", _on_stdb_initial_subscription)
 	stdbClient.connect("transaction_update", _on_stdb_transaction_update)
 	stdbClient.connect("identity_token", _on_stdb_identity_token)
-	
 	ChatUI.connect("send_message", send_chat_message)
+
+	username = generate_username()
+	ChatUI.set_username(username)
 
 func _process(delta: float) -> void:
 	render_player_list()
@@ -202,3 +206,11 @@ func render_player_list() -> void:
 	for playerId in playerMap:
 		playerList.append(playerMap[playerId].Identity)
 	ChatUI.render_player_list(playerList)
+
+func generate_username() -> String:
+	var adjectives = ["happy", "sad", "angry", "tall", "short"]
+	var nouns = ["cat", "dog", "bird", "car", "tree"]
+
+	var adj = adjectives.pick_random()
+	var noun = nouns.pick_random()
+	return "%s %s" % [adj, noun]
