@@ -5,7 +5,7 @@
 - [x] test scene: read player data to update scene
 - [ ] generate random username
 - [x] handle deletes correctly for both Players & ChatMessages
-- [ ] update spacetime_client to handle spacetimedb websocket messages; only return data for watched tables
+- [x] update spacetime_client to handle spacetimedb websocket messages; only return data for watched tables
 
 
 

@@ -116,22 +116,28 @@ func process_message(msg: PackedByteArray) -> void:
 			print("Received %s" % [key])
 			var data: Dictionary = {}
 			for table in item.database_update.tables:
+				data[table.table_name] = {}
 				for update in table.updates:
+					data[table.table_name]["deletes"] = []
+					data[table.table_name]["inserts"] = []
 					for delete in update.deletes:
-						data[table.table_name]["delete"] = JSON.parse_string(delete)
+						data[table.table_name].deletes.append(JSON.parse_string(delete))
 					for insert in update.inserts:
-						data[table.table_name]["insert"] = JSON.parse_string(insert)
+						data[table.table_name].inserts.append(JSON.parse_string(insert))
 			initial_subscription.emit(data)
 
 		elif key == "TransactionUpdate":
 			print("Received %s" % [key])
 			var data: Dictionary = {}
 			for table in item.status.Committed.tables:
+				data[table.table_name] = {}
 				for update in table.updates:
+					data[table.table_name]["deletes"] = []
+					data[table.table_name]["inserts"] = []
 					for delete in update.deletes:
-						data[table.table_name]["delete"] = JSON.parse_string(delete)
+						data[table.table_name].deletes.append(JSON.parse_string(delete))
 					for insert in update.inserts:
-						data[table.table_name]["insert"] = JSON.parse_string(insert)
-			transaction_update.emit(item)
+						data[table.table_name].inserts.append(JSON.parse_string(insert))
+			transaction_update.emit(data)
 		else:
 			print("Unhandled message type: %s" % [key])

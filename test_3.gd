@@ -16,7 +16,7 @@ func _ready() -> void:
 	ChatUI.connect("send_message", send_chat_message)
 
 func _process(delta: float) -> void:
-	pass
+	render_player_list()
 
 func _on_stdb_socket_open() -> void:
 	pass
@@ -25,13 +25,55 @@ func _on_stdb_socket_closed() -> void:
 	pass
 
 func _on_stdb_initial_subscription(data) -> void:
-	pass
+	print("Received Initial Subscription: %s" % [data])
+	for table in data.keys():
+		if table == "ChatMessages":
+			for insert in data[table].inserts:
+				var chatMessage: String = "[%s]: %s" % [insert.SenderId, insert.Message]
+				ChatUI.render_message("", chatMessage)
+				print("sent message: %s" % [chatMessage])
+		if table == "Players":
+			for insert in data[table].inserts:
+				insert_player(insert)
 
 func _on_stdb_transaction_update(data) -> void:
-	pass
+	print("Received Transaction Update: %s" % [data])
+	for table in data.keys():
+		if table == "ChatMessages":
+			for insert in data[table].inserts:
+				var row = {
+					"MessageId": insert[0],
+					"SenderId": insert[1],
+					"Message": insert[2],
+					"Timestamp": insert[3]
+				}
+				var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
+				ChatUI.render_message("", chatMessage)
+		if table == "Players":
+			for delete in data[table].deletes:
+				var row = {
+					"PlayerId": delete[0],
+					"Identity": delete[1],
+					"AvatarConfig": delete[2],
+					"Position": delete[3],
+					"Rotation": delete[4],
+					"isOnline": delete[5]
+				}
+				delete_player(row)
+			for insert in data[table].inserts:
+				var row = {
+					"PlayerId": insert[0],
+					"Identity": insert[1],
+					"AvatarConfig": insert[2],
+					"Position": insert[3],
+					"Rotation": insert[4],
+					"isOnline": insert[5]
+				}	
+				insert_player(row)
 
 func _on_stdb_identity_token(data) -> void:
-	pass
+	print("Received Identity Token: %s" % [data])
+	stdbClient.subscribe()
 
 func _on_stdb_new_message(msg: Variant) -> void:
 	parseStdbMessage(msg)
