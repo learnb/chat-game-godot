@@ -9,7 +9,7 @@ var isSocketOpen: bool		# Mutex lock for processing socket messages
 
 signal websocket_open
 signal websocket_closed
-signal new_message(msg: PackedByteArray)
+#signal new_message(msg: PackedByteArray)
 signal initial_subscription(data: Dictionary)
 signal transaction_update(data: Dictionary)
 signal identity_token(data: Dictionary)
@@ -33,7 +33,7 @@ func _process(delta: float) -> void:
 			# Process messages
 			while socket.get_available_packet_count():
 				process_message(socket.get_packet())
-				new_message.emit(socket.get_packet())
+				#new_message.emit(socket.get_packet())
 		WebSocketPeer.STATE_CLOSING:
 			print("WebSocket Closing")
 		WebSocketPeer.STATE_CLOSED:
@@ -59,9 +59,8 @@ func websocket_init() -> void:
 	socket = WebSocketPeer.new()
 	socket.supported_protocols = protocols
 	print("Sending socket open request: %s" % [websocket_url])
-	await socket.connect_to_url(websocket_url)
-	#var err = socket.connect_to_url(websocket_url)
-	#assert(err == OK)
+	var err = socket.connect_to_url(websocket_url)
+	assert(err == OK)
 	print("Socket request complete.")
 
 
@@ -108,7 +107,11 @@ func process_message(msg: PackedByteArray) -> void:
 		var item = json.get(key)
 		if key == "IdentityToken":
 			print("Received %s" % [key])
-			identity_token.emit(item)
+			var data: Dictionary = {}
+			data["identity"] = item["identity"]["__identity__"]
+			data["identity"] = item["connection_id"]["__connection_id__"]
+			data["identity"] = item["token"]
+			identity_token.emit(data)
 		elif key == "InitialSubscription":
 			print("Received %s" % [key])
 			var data: Dictionary = {}

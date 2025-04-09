@@ -8,7 +8,11 @@ var playerMap: Dictionary = {}
 func _ready() -> void:
 	stdbClient.connect("websocket_open", _on_stdb_socket_open)
 	stdbClient.connect("websocket_closed", _on_stdb_socket_closed)
-	stdbClient.connect("new_message", _on_stdb_new_message)
+	#stdbClient.connect("new_message", _on_stdb_new_message)
+	stdbClient.connect("initial_subscription", _on_stdb_initial_subscription)
+	stdbClient.connect("transaction_update", _on_stdb_transaction_update)
+	stdbClient.connect("identity_token", _on_stdb_identity_token)
+	
 	ChatUI.connect("send_message", send_chat_message)
 
 func _process(delta: float) -> void:
@@ -18,6 +22,15 @@ func _on_stdb_socket_open() -> void:
 	pass
 
 func _on_stdb_socket_closed() -> void:
+	pass
+
+func _on_stdb_initial_subscription(data) -> void:
+	pass
+
+func _on_stdb_transaction_update(data) -> void:
+	pass
+
+func _on_stdb_identity_token(data) -> void:
 	pass
 
 func _on_stdb_new_message(msg: Variant) -> void:
