@@ -9,7 +9,6 @@ var isSocketOpen: bool		# Mutex lock for processing socket messages
 
 signal websocket_open
 signal websocket_closed
-#signal new_message(msg: PackedByteArray)
 signal initial_subscription(data: Dictionary)
 signal transaction_update(data: Dictionary)
 signal identity_token(data: Dictionary)
@@ -18,7 +17,7 @@ func _ready():
 	websocket_init()
 
 ## Processes the WebSocket connection state and incoming messages.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# Process WebSocket state
 	socket.poll()
 	var state = socket.get_ready_state()
@@ -33,7 +32,6 @@ func _process(delta: float) -> void:
 			# Process messages
 			while socket.get_available_packet_count():
 				process_message(socket.get_packet())
-				#new_message.emit(socket.get_packet())
 		WebSocketPeer.STATE_CLOSING:
 			print("WebSocket Closing")
 		WebSocketPeer.STATE_CLOSED:

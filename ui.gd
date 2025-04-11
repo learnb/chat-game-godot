@@ -17,10 +17,10 @@ func _ready():
 
 func _on_message_entered(text: String) -> void:
 	if inputField.text:
-		emit_signal("send_message", username, text)
+		send_message.emit(username, text)
 
-func render_message(username: String, text: String) -> void:
-	var msg: String = "\n[%s] %s" % [username, text]
+func render_message(_username: String, text: String) -> void:
+	var msg: String = "\n[%s] %s" % [_username, text]
 	chatLog.add_text(msg) # render message
 	chatLog.scroll_to_line(chatLog.get_line_count() - 1) # scroll to bottom
 	inputField.text = '' # clear input field
@@ -31,6 +31,6 @@ func render_player_list(players: Array) -> void:
 		playerList.add_text("\n%s" % player)
 	playerList.scroll_to_line(playerList.get_line_count() - 1)
 
-func set_username(name: String) -> void:
-	username = name
+func set_username(_username: String) -> void:
+	username = _username
 	inputLabel.text = username
