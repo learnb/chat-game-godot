@@ -77,6 +77,8 @@ func websocket_init() -> void:
 ##
 ## Creates a subscription message for all tables defined in the `table_names` export array, then sends it to the server.
 func subscribe() -> int:
+	if !isSocketOpen:
+		return -1
 	var request_id: int = randi() % (1 << 32)
 	var queries: Array = table_map.keys().map(func(t): return "SELECT * FROM %s" % [t])	
 	var subscribeMessage: Dictionary = {
@@ -86,7 +88,7 @@ func subscribe() -> int:
 		}
 	}
 	var msgString: String = JSON.stringify(subscribeMessage)
-	print("Sending message: %s" % [msgString])
+	#print("Sending message: %s" % [msgString])
 	socket.send_text(msgString)
 	return request_id
 
@@ -94,6 +96,8 @@ func subscribe() -> int:
 ##
 ## Creates a CallReducer message for the reducer spefied in the `reducer` argument, then sends it to the server.
 func callReducer(reducer: String, args: String) -> int:
+	if !isSocketOpen:
+		return -1
 	var request_id: int = randi() % (1 << 32)
 	var callReducerMessage: Dictionary = {
 		"CallReducer": {
@@ -104,7 +108,7 @@ func callReducer(reducer: String, args: String) -> int:
 		}
 	}
 	var msgString: String = JSON.stringify(callReducerMessage)
-	print("Sending message: %s" % [msgString])
+	#print("Sending message: %s" % [msgString])
 	socket.send_text(msgString)
 	return request_id
 
@@ -115,14 +119,14 @@ func process_message(msg: PackedByteArray) -> void:
 	for key in json:
 		var item = json.get(key)
 		if key == "IdentityToken":
-			print("Received %s" % [key])
+			#print("Received %s" % [key])
 			var data: Dictionary = {}
 			data["identity"] = item["identity"]["__identity__"]
 			data["identity"] = item["connection_id"]["__connection_id__"]
 			data["identity"] = item["token"]
 			identity_token.emit(data)
 		elif key == "InitialSubscription":
-			print("Received %s" % [key])
+			#print("Received %s" % [key])
 			var data: Dictionary = {}
 			for table in item.database_update.tables:
 				data[table.table_name] = {}
@@ -140,7 +144,7 @@ func process_message(msg: PackedByteArray) -> void:
 			initial_subscription.emit(data)
 
 		elif key == "TransactionUpdate":
-			print("Received %s" % [key])
+			#print("Received %s" % [key])
 			var data: Dictionary = {}
 			for table in item.status.Committed.tables:
 				data[table.table_name] = {}

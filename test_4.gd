@@ -29,7 +29,7 @@ func _on_stdb_socket_closed() -> void:
 	pass
 
 func _on_stdb_initial_subscription(data) -> void:
-	print("Received Initial Subscription: %s" % [data])
+	#print("Received Initial Subscription: %s" % [data])
 	for table in data.keys():
 		if table == "ChatMessages":
 			for newChatMessage in data[table].inserts:
@@ -40,7 +40,7 @@ func _on_stdb_initial_subscription(data) -> void:
 				insert_player(newPlayer)
 
 func _on_stdb_transaction_update(data) -> void:
-	print("Received Transaction Update: %s" % [data])
+	#print("Received Transaction Update: %s" % [data])
 	for table in data.keys():
 		if table == "ChatMessages":
 			for newChatMessage in data[table].inserts:
@@ -52,7 +52,7 @@ func _on_stdb_transaction_update(data) -> void:
 				insert_player(newPlayer)
 
 func _on_stdb_identity_token(data) -> void:
-	print("Received Identity Token: %s" % [data])
+	#print("Received Identity Token: %s" % [data])
 	stdbClient.subscribe()
 
 func send_chat_message(user: String, text: String) -> void:
@@ -71,6 +71,9 @@ func delete_player(playerData) -> void:
 	playerMap.erase(playerData.player_id)
 
 func sync_player() -> void:
+	if !stdbClient.isSocketOpen:
+		return
+
 	var argData = JSON.stringify([
 		username,
 		"",
