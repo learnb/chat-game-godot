@@ -1,8 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://co4mjmivp12j6"]
+[gd_scene load_steps=11 format=3 uid="uid://co4mjmivp12j6"]
 
 [ext_resource type="Script" path="res://test_3.gd" id="1_ol6m0"]
 [ext_resource type="PackedScene" uid="uid://ckeuewle5watv" path="res://UI.tscn" id="2_g7yjj"]
 [ext_resource type="PackedScene" uid="uid://dqdiot00qbpas" path="res://spacetime_client.tscn" id="3_8ygtv"]
+[ext_resource type="Resource" uid="uid://bki60vl2nlif4" path="res://data_models/Player.tres" id="4_7uuju"]
+[ext_resource type="Resource" uid="uid://diqd7t78orpxe" path="res://data_models/ChatMessage.tres" id="5_g047d"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v3paj"]
 sky_top_color = Color(0.317647, 0.392157, 0.882353, 1)
@@ -38,4 +40,4 @@ mesh = SubResource("BoxMesh_tp0wi")
 [node name="Spacetime_Client" parent="." instance=ExtResource("3_8ygtv")]
 host_url = "wss://spacetime.bryanlearn.com"
 database_name = "chat-game-dev"
-table_names = Array[String](["ChatMessages", "Players"])
+table_schemas = Array[Resource]([ExtResource("5_g047d"), ExtResource("4_7uuju")])

@@ -4,7 +4,6 @@ extends Node3D
 @onready var stdbClient = $Spacetime_Client
 
 var username: String
-
 var playerMap: Dictionary = {}
 
 func _ready() -> void:
@@ -31,47 +30,24 @@ func _on_stdb_initial_subscription(data) -> void:
 	print("Received Initial Subscription: %s" % [data])
 	for table in data.keys():
 		if table == "ChatMessages":
-			for insert in data[table].inserts:
-				var chatMessage: String = "[%s]: %s" % [insert.SenderId, insert.Message]
+			for newChatMessage in data[table].inserts:
+				var chatMessage: String = "[%s]: %s" % [newChatMessage.sender_id, newChatMessage.message]
 				ChatUI.render_message("", chatMessage)
 		if table == "Players":
-			for insert in data[table].inserts:
-				insert_player(insert)
+			for newPlayer in data[table].inserts:
+				insert_player(newPlayer)
 
 func _on_stdb_transaction_update(data) -> void:
 	print("Received Transaction Update: %s" % [data])
 	for table in data.keys():
 		if table == "ChatMessages":
-			for insert in data[table].inserts:
-				var row = {
-					"MessageId": insert[0],
-					"SenderId": insert[1],
-					"Message": insert[2],
-					"Timestamp": insert[3]
-				}
-				var chatMessage: String = "[%s]: %s" % [row.SenderId, row.Message]
-				ChatUI.render_message("", chatMessage)
+			for newChatMessage in data[table].inserts:
+				ChatUI.render_message("", "[%s]: %s" % [newChatMessage.sender_id, newChatMessage.message])
 		if table == "Players":
-			for delete in data[table].deletes:
-				var row = {
-					"PlayerId": delete[0],
-					"Identity": delete[1],
-					"AvatarConfig": delete[2],
-					"Position": delete[3],
-					"Rotation": delete[4],
-					"isOnline": delete[5]
-				}
-				delete_player(row)
-			for insert in data[table].inserts:
-				var row = {
-					"PlayerId": insert[0],
-					"Identity": insert[1],
-					"AvatarConfig": insert[2],
-					"Position": insert[3],
-					"Rotation": insert[4],
-					"isOnline": insert[5]
-				}	
-				insert_player(row)
+			for delPlayer in data[table].deletes:
+				delete_player(delPlayer)
+			for newPlayer in data[table].inserts:
+				insert_player(newPlayer)
 
 func _on_stdb_identity_token(data) -> void:
 	print("Received Identity Token: %s" % [data])
@@ -82,20 +58,20 @@ func send_chat_message(user: String, text: String) -> void:
 	stdbClient.callReducer("AddChatMessage", argData)
 
 func update_player(playerData) -> void:
-	playerMap[playerData.PlayerId] = playerData
+	playerMap[playerData.player_id] = playerData
 	if !playerData.isOnline:
-		playerMap.erase(playerData.PlayerId)
+		playerMap.erase(playerData.player_id)
 
 func insert_player(playerData) -> void:
-	playerMap[playerData.PlayerId] = playerData
+	playerMap[playerData.player_id] = playerData
 
 func delete_player(playerData) -> void:
-	playerMap.erase(playerData.PlayerId)
+	playerMap.erase(playerData.player_id)
 
 func render_player_list() -> void:
 	var playerList: Array[String] = []
 	for playerId in playerMap:
-		playerList.append(playerMap[playerId].Identity)
+		playerList.append(playerMap[playerId].identity)
 	ChatUI.render_player_list(playerList)
 
 func generate_username() -> String:

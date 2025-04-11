@@ -2,7 +2,9 @@ extends Node
 
 @export var host_url: String = "wss://"
 @export var database_name: String = ""
-@export var table_names: Array[String] = []
+@export var table_schemas: Array[Resource] = []
+
+var table_map: Dictionary = {}
 
 var socket: WebSocketPeer
 var isSocketOpen: bool		# Mutex lock for processing socket messages
@@ -13,7 +15,16 @@ signal initial_subscription(data: Dictionary)
 signal transaction_update(data: Dictionary)
 signal identity_token(data: Dictionary)
 
+func _init() -> void:
+	pass
+
+
 func _ready():
+	# Register tables
+	for schema in table_schemas:
+		table_map[schema.table_name] = schema
+	
+	# Start websocket connection
 	websocket_init()
 
 ## Processes the WebSocket connection state and incoming messages.
@@ -67,7 +78,7 @@ func websocket_init() -> void:
 ## Creates a subscription message for all tables defined in the `table_names` export array, then sends it to the server.
 func subscribe() -> int:
 	var request_id: int = randi() % (1 << 32)
-	var queries: Array = table_names.map(func(t): return "SELECT * FROM %s" % [t])	
+	var queries: Array = table_map.keys().map(func(t): return "SELECT * FROM %s" % [t])	
 	var subscribeMessage: Dictionary = {
 		"Subscribe": {
 			"query_strings": queries,	# list of SQL queries to subscribe to.
@@ -119,9 +130,13 @@ func process_message(msg: PackedByteArray) -> void:
 					data[table.table_name]["deletes"] = []
 					data[table.table_name]["inserts"] = []
 					for delete in update.deletes:
-						data[table.table_name].deletes.append(JSON.parse_string(delete))
+						var newObj = table_map[table.table_name].duplicate()
+						newObj.update(JSON.parse_string(delete).values())
+						data[table.table_name].deletes.append(newObj)
 					for insert in update.inserts:
-						data[table.table_name].inserts.append(JSON.parse_string(insert))
+						var newObj = table_map[table.table_name].duplicate()
+						newObj.update(JSON.parse_string(insert).values())
+						data[table.table_name].inserts.append(newObj)
 			initial_subscription.emit(data)
 
 		elif key == "TransactionUpdate":
@@ -133,9 +148,13 @@ func process_message(msg: PackedByteArray) -> void:
 					data[table.table_name]["deletes"] = []
 					data[table.table_name]["inserts"] = []
 					for delete in update.deletes:
-						data[table.table_name].deletes.append(JSON.parse_string(delete))
+						var newObj = table_map[table.table_name].duplicate()
+						newObj.update(JSON.parse_string(delete))
+						data[table.table_name].deletes.append(newObj)
 					for insert in update.inserts:
-						data[table.table_name].inserts.append(JSON.parse_string(insert))
+						var newObj = table_map[table.table_name].duplicate()	
+						newObj.update(JSON.parse_string(insert))	
+						data[table.table_name].inserts.append(newObj)
 			transaction_update.emit(data)
 		else:
 			print("Unhandled message type: %s" % [key])
