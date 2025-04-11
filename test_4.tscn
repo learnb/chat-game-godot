@@ -1,0 +1,67 @@
+[gd_scene load_steps=15 format=3 uid="uid://egp41m2ubl1k"]
+
+[ext_resource type="Script" path="res://test_4.gd" id="1_m75xf"]
+[ext_resource type="PackedScene" uid="uid://ckeuewle5watv" path="res://UI.tscn" id="2_ci0l8"]
+[ext_resource type="PackedScene" uid="uid://dqdiot00qbpas" path="res://spacetime_client.tscn" id="3_bmfk0"]
+[ext_resource type="Resource" uid="uid://diqd7t78orpxe" path="res://data_models/ChatMessage.tres" id="4_dmerr"]
+[ext_resource type="Resource" uid="uid://bki60vl2nlif4" path="res://data_models/Player.tres" id="5_fllim"]
+[ext_resource type="PackedScene" uid="uid://c44o47e2tv1dl" path="res://player_character.tscn" id="6_gtlnw"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v3paj"]
+sky_top_color = Color(0.317647, 0.392157, 0.882353, 1)
+sky_horizon_color = Color(0.647059, 0, 0.670588, 1)
+
+[sub_resource type="Sky" id="Sky_5t2sy"]
+sky_material = SubResource("ProceduralSkyMaterial_v3paj")
+
+[sub_resource type="Environment" id="Environment_hdwfq"]
+background_mode = 2
+sky = SubResource("Sky_5t2sy")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uow0m"]
+shading_mode = 0
+diffuse_mode = 3
+albedo_color = Color(0.54902, 0.529412, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_tp0wi"]
+material = SubResource("StandardMaterial3D_uow0m")
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_sm7q1"]
+points = PackedVector3Array(-50, -0.5, -50, -50, 0.5, -50, 50, -0.5, -50, -50, -0.5, 50, -50, 0.5, 50, 50, 0.5, -50, 50, -0.5, 50, 50, 0.5, 50)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mv2bu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_yw0sq"]
+material = SubResource("StandardMaterial3D_mv2bu")
+size = Vector3(100, 1, 100)
+
+[node name="test4" type="Node3D"]
+script = ExtResource("1_m75xf")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.967652, -0.252289, 0, 0.252289, 0.967652, 0, 1.38799, 10.2858)
+environment = SubResource("Environment_hdwfq")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_tp0wi")
+
+[node name="ChatUI" parent="." instance=ExtResource("2_ci0l8")]
+
+[node name="Spacetime_Client" parent="." instance=ExtResource("3_bmfk0")]
+host_url = "wss://spacetime.bryanlearn.com"
+database_name = "chat-game-dev"
+table_schemas = Array[Resource]([ExtResource("4_dmerr"), ExtResource("5_fllim")])
+
+[node name="PlayerCharacter" parent="." instance=ExtResource("6_gtlnw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.77996, 0, 0)
+
+[node name="GroundStaticBody" type="StaticBody3D" parent="."]
+
+[node name="GroundCollision" type="CollisionShape3D" parent="GroundStaticBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.63562, 0)
+shape = SubResource("ConvexPolygonShape3D_sm7q1")
+
+[node name="GroundMesh" type="MeshInstance3D" parent="GroundStaticBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.63562, 0)
+mesh = SubResource("BoxMesh_yw0sq")
+skeleton = NodePath("../..")

@@ -2,6 +2,7 @@ extends Node3D
 
 @onready var ChatUI = $ChatUI
 @onready var stdbClient = $Spacetime_Client
+@onready var playerCharacter = $PlayerCharacter
 
 var username: String
 var playerMap: Dictionary = {}
@@ -19,8 +20,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	render_player_list()
-	
-	
+	sync_player()	
 
 func _on_stdb_socket_open() -> void:
 	pass
@@ -69,6 +69,23 @@ func insert_player(playerData) -> void:
 
 func delete_player(playerData) -> void:
 	playerMap.erase(playerData.player_id)
+
+func sync_player() -> void:
+	var argData = JSON.stringify([
+		username,
+		"",
+		{
+			"X": playerCharacter.position.x,
+			"Y": playerCharacter.position.y,
+			"Z": playerCharacter.position.z
+		},
+		{
+			"X": playerCharacter.rotation.x,
+			"Y": playerCharacter.rotation.y,
+			"Z": playerCharacter.rotation.z
+		}
+	])
+	stdbClient.callReducer("UpsertPlayer", argData)
 
 func render_player_list() -> void:
 	var playerList: Array[String] = []

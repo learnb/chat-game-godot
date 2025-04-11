@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bki60vl2nlif4"]
+[gd_resource type="Resource" script_class="Player" load_steps=2 format=3 uid="uid://bki60vl2nlif4"]
 
 [ext_resource type="Script" path="res://data_models/Player.gd" id="1_y7dy4"]
 

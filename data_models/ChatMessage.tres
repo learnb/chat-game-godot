@@ -1,4 +1,4 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://diqd7t78orpxe"]
+[gd_resource type="Resource" script_class="ChatMessage" load_steps=2 format=3 uid="uid://diqd7t78orpxe"]
 
 [ext_resource type="Script" path="res://data_models/ChatMessage.gd" id="1_73l8n"]
 
