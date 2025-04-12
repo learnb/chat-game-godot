@@ -18,6 +18,17 @@ func _ready() -> void:
 	username = generate_username()
 	ChatUI.set_username(username)
 
+func _exit_tree() -> void:
+	# Remove player from Spacetime DB
+	var argData = JSON.stringify([username])
+	stdbClient.callReducer("RemovePlayer", argData)
+	
+	# wait a few seconds
+	await get_tree().create_timer(2).timeout
+
+	# Disconnect from Spacetime DB
+	stdbClient.websocket_close()
+
 func _process(_delta: float) -> void:
 	render_player_list()
 	sync_player()	
@@ -52,7 +63,7 @@ func _on_stdb_transaction_update(data) -> void:
 				insert_player(newPlayer)
 
 func _on_stdb_identity_token(data) -> void:
-	#print("Received Identity Token: %s" % [data])
+	print("Received Identity Token: %s" % [data])
 	stdbClient.subscribe()
 
 func send_chat_message(user: String, text: String) -> void:

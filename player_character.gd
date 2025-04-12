@@ -1,9 +1,13 @@
 extends CharacterBody3D
 
+var player_id: int:
+	get:
+		return player_id
+	set(value):
+		player_id = value
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
-
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.

@@ -72,6 +72,9 @@ func websocket_init() -> void:
 	assert(err == OK)
 	print("Socket request complete.")
 
+func websocket_close() -> void:
+	socket.close()
+	isSocketOpen = false
 
 ## Sends a Subscribe request to the SpacetimeDB Server.
 ##
