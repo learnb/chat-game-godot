@@ -39,6 +39,7 @@ func _process(_delta: float) -> void:
 
 func _on_stdb_socket_open() -> void:
 	pass
+	sync_player(true)
 
 func _on_stdb_socket_closed() -> void:
 	pass
@@ -113,15 +114,20 @@ func delete_player(playerData) -> void:
 func spawn_player(playerData) -> void:
 	var newPlayerScene = remotePlayer.instantiate()
 	newPlayerScene.name = playerData.identity
+	newPlayerScene.stdbClient = stdbClient
+	newPlayerScene.player = playerData
 	print("adding remote player to scene: %s" % [newPlayerScene])
 	add_child(newPlayerScene)
 
 func despawn_player(playerData) -> void:
 	for child in get_children():
 		if child.name == playerData.identity:
-			child.queue_free()
+			print("calling child.despawn()")
+			child.despawn()
+			#child.set_process(false)
+			#child.queue_free()
 
-func sync_player() -> void:
+func sync_player(isNew: bool = false) -> void:
 	if !stdbClient.isSocketOpen:
 		return
 
@@ -139,7 +145,10 @@ func sync_player() -> void:
 			"Z": playerCharacter.rotation.z
 		}
 	])
-	stdbClient.callReducer("UpsertPlayer", argData)
+	if isNew:
+		stdbClient.callReducer("UpsertPlayer", argData)
+	else:
+		stdbClient.callReducer("UpdatePlayer", argData)
 
 func render_player_list() -> void:
 	var playerList: Array[String] = []
