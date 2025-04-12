@@ -59,20 +59,27 @@ func _on_stdb_transaction_update(data) -> void:
 			for newChatMessage in data[table].inserts:
 				ChatUI.render_message("", "[%s]: %s" % [newChatMessage.sender_id, newChatMessage.message])
 		if table == "Players":
-			# TODO: find unique player_id values in delete and insert sets
-			var deleted_player_ids = {}
-			var inserted_player_ids = {}
-
-			var updates: Dictionary = {}
+			var deleted_players: Dictionary = {}
+			var inserted_players: Dictionary = {}
+			
 			for delPlayer in data[table].deletes:
-				updates[delPlayer.player_id] = delPlayer
+				deleted_players[delPlayer.player_id] = delPlayer
 			for newPlayer in data[table].inserts:
-				updates[newPlayer.player_id] = newPlayer
+				inserted_players[newPlayer.player_id] = newPlayer
 
-			#for delPlayer in data[table].deletes:
-			#	delete_player(delPlayer)
-			#for newPlayer in data[table].inserts:
-			#	insert_player(newPlayer)
+			for player_id in deleted_players.keys():
+				if !inserted_players.has(player_id):
+					# actual removed player
+					delete_player(deleted_players[player_id])
+
+			for player_id in inserted_players.keys():
+				if !deleted_players.has(player_id):
+					# actual new player
+					insert_player(inserted_players[player_id])
+				else:
+					# player update
+					update_player(inserted_players[player_id])
+
 
 func _on_stdb_identity_token(data) -> void:
 	print("Received Identity Token: %s" % [data])
@@ -84,13 +91,20 @@ func send_chat_message(user: String, text: String) -> void:
 
 func update_player(playerData) -> void:
 	playerMap[playerData.player_id] = playerData
-	if !playerData.isOnline:
-		playerMap.erase(playerData.player_id)
 
 func insert_player(playerData) -> void:
+	# ignore own player
+	if playerData.identity == username:
+		print("Ignoring own player. identity: %s" % [playerData.identity])
+		print("Ignoring own player. player_id: %s" % [playerData.player_id])
+		return
 	playerMap[playerData.player_id] = playerData
+	# add player to scene
+	print("Adding player: %s" % [playerData.identity])
 
 func delete_player(playerData) -> void:
+	# remove player from scene
+	print("Removing player: %s" % [playerData.identity])
 	playerMap.erase(playerData.player_id)
 
 func sync_player() -> void:
