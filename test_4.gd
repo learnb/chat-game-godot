@@ -4,6 +4,8 @@ extends Node3D
 @onready var stdbClient = $Spacetime_Client
 @onready var playerCharacter = $PlayerCharacter
 
+var stdbPlayer: Player = preload("res://data_models/Player.tres")
+
 var username: String
 var playerMap: Dictionary = {}
 
@@ -57,10 +59,20 @@ func _on_stdb_transaction_update(data) -> void:
 			for newChatMessage in data[table].inserts:
 				ChatUI.render_message("", "[%s]: %s" % [newChatMessage.sender_id, newChatMessage.message])
 		if table == "Players":
+			# TODO: find unique player_id values in delete and insert sets
+			var deleted_player_ids = {}
+			var inserted_player_ids = {}
+
+			var updates: Dictionary = {}
 			for delPlayer in data[table].deletes:
-				delete_player(delPlayer)
+				updates[delPlayer.player_id] = delPlayer
 			for newPlayer in data[table].inserts:
-				insert_player(newPlayer)
+				updates[newPlayer.player_id] = newPlayer
+
+			#for delPlayer in data[table].deletes:
+			#	delete_player(delPlayer)
+			#for newPlayer in data[table].inserts:
+			#	insert_player(newPlayer)
 
 func _on_stdb_identity_token(data) -> void:
 	print("Received Identity Token: %s" % [data])
