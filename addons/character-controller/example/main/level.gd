@@ -13,6 +13,7 @@ var playerMap: Dictionary = {}
 var username: String
 var localPlayerId: int
 var remotePlayer: PackedScene = preload("res://remote_player.tscn")
+var remoteEntity: PackedScene = preload("res://remote_entity.tscn")
 
 func _ready() -> void:
 	#if !OS.is_debug_build():
@@ -56,6 +57,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_stdb_socket_open() -> void:
 	pass
 	sync_player(true)
+	spawn_stuff()
 	
 func _on_stdb_socket_closed() -> void:
 	pass
@@ -91,6 +93,27 @@ func _on_stdb_transaction_update(data: Dictionary) -> void:
 				else:
 					# player update
 					update_player(inserted_players[player_id])
+		if table == "Entities":
+			var deleted_entities: Dictionary = {}
+			var inserted_entities: Dictionary = {}
+			
+			for delEnt in data[table].deletes:
+				deleted_entities[delEnt.entity_id] = delEnt
+			for newEnt in data[table].inserts:
+				inserted_entities[newEnt.entity_id] = newEnt
+
+			for entity_id in deleted_entities.keys():
+				if !inserted_entities.has(entity_id):
+					# actual removed entity
+					delete_entity(deleted_entities[entity_id])
+
+			for entity_id in inserted_entities.keys():
+				if !deleted_entities.has(entity_id):
+					# actual new entity
+					insert_entity(inserted_entities[entity_id])
+				else:
+					# entity update
+					update_entity(inserted_entities[entity_id])
 
 func _on_stdb_identity_token(data: Dictionary) -> void:
 	pass
@@ -171,6 +194,45 @@ func despawn_player(player: StdbPlayer) -> void:
 			print("removing remote player from scene: %s" % [child.name])
 			child.despawn()
 
+func insert_entity(entity: StdbEntity) -> void:
+	pass
+
+func update_entity(entity: StdbEntity) -> void:
+	pass
+
+func delete_entity(entity: StdbEntity) -> void:
+	pass
+
+func spawn_stuff() -> void:
+	if !stdbClient.isSocketOpen:
+		return
+	
+	for index in range(0, 10):
+		var argData = JSON.stringify([
+			"Ball",
+			{
+				"X": randf_range(-15, 15), 
+				"Y": randf_range(-15, 15), 
+				"Z": randf_range(-15, 15)
+			},
+			{
+				"X": 0,
+				"Y": 0,
+				"Z": 0
+			}
+		])
+		
+		stdbClient.callReducer("InsertEntity", argData)
+
+
+#func spawn_stuff() -> void:
+#	for index in range(0, 10):
+#		var newEntityScene = remoteEntity.instantiate()
+#		newEntityScene.entity_id = index
+#		newEntityScene.name = "remoteEntity_%d" % [index]
+#		newEntityScene.stdbClient = stdbClient
+#		print("adding remote entity to scene: %s" % [newEntityScene])
+#		add_child(newEntityScene)
 
 func generate_username():
 	var emojis = []
@@ -182,6 +244,6 @@ func generate_username():
 		emojis.append(char(codepoint))
 	var random_emojis = []
 	for _i in range(3):
-		random_emojis.pick_random()
-		#random_emojis.append(emojis[randi() % emojis.size()])
+		#random_emojis.pick_random()
+		random_emojis.append(emojis[randi() % emojis.size()])
 	return "".join(random_emojis)

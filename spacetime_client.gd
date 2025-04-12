@@ -149,6 +149,10 @@ func process_message(msg: PackedByteArray) -> void:
 		elif key == "TransactionUpdate":
 			#print("Received %s" % [key])
 			var data: Dictionary = {}
+			if !item.status.has("Committed"):
+				print("error: no committed status")
+				print("failed: %s" % [item.status.Failed])
+				return
 			for table in item.status.Committed.tables:
 				data[table.table_name] = {}
 				for update in table.updates:
