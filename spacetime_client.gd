@@ -161,6 +161,8 @@ func process_message(msg: PackedByteArray) -> void:
 					for insert in update.inserts:
 						var newObj = table_map[table.table_name].duplicate()	
 						newObj.update(JSON.parse_string(insert))	
+						#print("[client_process_message] parsed json: %s" % [JSON.parse_string(insert)])
+						#print("[client_process_message] insert player position: %s" % [newObj.position])	
 						data[table.table_name].inserts.append(newObj)
 			transaction_update.emit(data)
 		else:

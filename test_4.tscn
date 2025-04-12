@@ -31,7 +31,7 @@ size = Vector3(100, 1, 100)
 script = ExtResource("1_m75xf")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.967652, -0.252289, 0, 0.252289, 0.967652, 0, 1.38799, 10.2858)
+transform = Transform3D(1, 0, 0, 0, 0.873543, 0.486747, 0, -0.486747, 0.873543, 0, 55.36, 92.9811)
 environment = SubResource("Environment_hdwfq")
 
 [node name="ChatUI" parent="." instance=ExtResource("2_ci0l8")]

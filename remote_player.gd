@@ -22,7 +22,7 @@ var stdbClient:
 func _ready() -> void:
 	pass
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	sync_player()
 	pass
 
@@ -31,29 +31,10 @@ func despawn() -> void:
 	queue_free()
 
 func sync_player() -> void:
-	if !stdbClient:
-		print("no stdbClient for player: %s" % [name])
-		return
-	
 	if !player:
 		print("no player set for player: %s" % [name])
 		return
-	
-	if !stdbClient.isSocketOpen:
-		return
-
-	var argData = JSON.stringify([
-		player.identity,
-		"",
-		{
-			"X": player.position.x,
-			"Y": player.position.y,
-			"Z": player.position.z
-		},
-		{
-			"X": player.rotation.x,
-			"Y": player.rotation.y,
-			"Z": player.rotation.z
-		}
-	])
-	stdbClient.callReducer("UpdatePlayer", argData)
+	self.player = self.get_parent().playerMap[player.player_id]
+	#print("player: %s\n\tposition: %s" % [player.identity, player.position])	
+	self.position = player.position
+	self.rotation = player.rotation	

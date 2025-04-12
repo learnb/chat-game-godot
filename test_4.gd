@@ -10,6 +10,8 @@ var remotePlayer: PackedScene = preload("res://remote_player.tscn")
 var username: String
 var playerMap: Dictionary = {}
 
+var prevPosition = Vector3.ZERO
+
 func _ready() -> void:
 	stdbClient.connect("websocket_open", _on_stdb_socket_open)
 	stdbClient.connect("websocket_closed", _on_stdb_socket_closed)
@@ -35,6 +37,7 @@ func _exit_tree() -> void:
 
 func _process(_delta: float) -> void:
 	render_player_list()
+	#sync_remote_players()
 	sync_player()	
 
 func _on_stdb_socket_open() -> void:
@@ -81,6 +84,7 @@ func _on_stdb_transaction_update(data) -> void:
 					insert_player(inserted_players[player_id])
 				else:
 					# player update
+					print("update for player %s (%s)" % [player_id, inserted_players[player_id].identity])
 					update_player(inserted_players[player_id])
 
 
@@ -94,6 +98,7 @@ func send_chat_message(user: String, text: String) -> void:
 
 func update_player(playerData) -> void:
 	playerMap[playerData.player_id] = playerData
+	print("updated player %s position: %s" % [playerData.identity, playerData.position])
 
 func insert_player(playerData) -> void:
 	# ignore own player
@@ -113,7 +118,8 @@ func delete_player(playerData) -> void:
 
 func spawn_player(playerData) -> void:
 	var newPlayerScene = remotePlayer.instantiate()
-	newPlayerScene.name = playerData.identity
+	newPlayerScene.name = "remotePlayer_%d" % playerData.player_id
+	newPlayerScene.player_id = playerData.player_id
 	newPlayerScene.stdbClient = stdbClient
 	newPlayerScene.player = playerData
 	print("adding remote player to scene: %s" % [newPlayerScene])
@@ -121,15 +127,26 @@ func spawn_player(playerData) -> void:
 
 func despawn_player(playerData) -> void:
 	for child in get_children():
-		if child.name == playerData.identity:
+		if child.name == "remotePlayer_%d" % playerData.player_id:
 			print("calling child.despawn()")
 			child.despawn()
 			#child.set_process(false)
 			#child.queue_free()
 
+#func sync_remote_players() -> void:
+#	for child in get_children():
+#		if child.has_meta("player_id"):
+#			print("syncing remote player: %s" % [child.name])
+#			child.player = playerMap[child.player_id]
+
 func sync_player(isNew: bool = false) -> void:
 	if !stdbClient.isSocketOpen:
 		return
+
+	if playerCharacter.position == prevPosition:
+		return
+	else:
+		prevPosition = playerCharacter.position
 
 	var argData = JSON.stringify([
 		username,
