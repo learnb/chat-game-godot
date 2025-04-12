@@ -35,7 +35,7 @@ func sync_player() -> void:
 		print("no player set for player: %s" % [name])
 		return
 	self.player = self.get_parent().playerMap[player.player_id]
-	print("[sync player] id: %s, position: %s" % [player.identity, player.position])
+	#print("[sync player] id: %s, position: %s" % [player.identity, player.position])
 	#print("player: %s\n\tposition: %s" % [player.identity, player.position])	
 	self.position = player.position
 	self.rotation = player.rotation	

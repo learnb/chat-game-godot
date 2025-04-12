@@ -9,6 +9,7 @@ extends Node3D
 @onready var player = $Player
 @onready var stdbClient = $Spacetime_Client
 var playerMap: Dictionary = {}
+var entityMap: Dictionary = {}
 
 var username: String
 var localPlayerId: int
@@ -57,7 +58,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_stdb_socket_open() -> void:
 	pass
 	sync_player(true)
-	spawn_stuff()
+	#spawn_stuff()
 	
 func _on_stdb_socket_closed() -> void:
 	pass
@@ -68,6 +69,9 @@ func _on_stdb_initial_subscription(data: Dictionary) -> void:
 		if table == "Players":
 			for newPlayer in data[table].inserts:
 				insert_player(newPlayer)
+		if table == "Entities":
+			for newEnt in data[table].inserts:
+				insert_entity(newEnt)
 
 func _on_stdb_transaction_update(data: Dictionary) -> void:
 	pass
@@ -94,6 +98,7 @@ func _on_stdb_transaction_update(data: Dictionary) -> void:
 					# player update
 					update_player(inserted_players[player_id])
 		if table == "Entities":
+			print("Entity update")
 			var deleted_entities: Dictionary = {}
 			var inserted_entities: Dictionary = {}
 			
@@ -196,18 +201,43 @@ func despawn_player(player: StdbPlayer) -> void:
 
 func insert_entity(entity: StdbEntity) -> void:
 	pass
+	entityMap[entity.entity_id] = entity
+	print("Adding entity: %s" % [entity.entity_id])
+	spawn_entity(entity)
 
 func update_entity(entity: StdbEntity) -> void:
 	pass
+	entityMap[entity.entity_id] = entity
 
 func delete_entity(entity: StdbEntity) -> void:
 	pass
+	# remove entity from scene
+	print("Removing entity: %s" % [entity.entity_id])
+	despawn_entity(entity)
+	entityMap.erase(entity.entity_id)
+
+func spawn_entity(entity: StdbEntity) -> void:
+	pass
+	var newEntityScene = remoteEntity.instantiate()
+	newEntityScene.entity_id = entity.entity_id
+	newEntityScene.name = "remoteEntity_%d" % entity.entity_id
+	newEntityScene.stdbClient = stdbClient
+	newEntityScene.entity = entity
+	print("adding remote entity to scene: %s" % [newEntityScene])
+	add_child(newEntityScene)
+
+func despawn_entity(entity: StdbEntity) -> void:
+	pass
+	for child in get_children():
+		if child.name == "remoteEntity_%d" % entity.entity_id:
+			print("removing remote entity from scene: %s" % [child.name])
+			child.despawn()
 
 func spawn_stuff() -> void:
 	if !stdbClient.isSocketOpen:
 		return
 	
-	for index in range(0, 10):
+	for index in range(0, 100):
 		var argData = JSON.stringify([
 			"Ball",
 			{
