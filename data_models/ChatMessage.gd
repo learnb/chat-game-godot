@@ -1,4 +1,4 @@
-class_name ChatMessage extends Resource
+class_name StdbChatMessage extends Resource
 
 var table_name = "ChatMessages"
 

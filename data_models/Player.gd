@@ -1,4 +1,4 @@
-class_name Player extends Resource
+class_name StdbPlayer extends Resource
 
 var table_name = "Players"
 

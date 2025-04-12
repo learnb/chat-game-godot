@@ -6,6 +6,13 @@ extends Node3D
 ## If true, Esc key quit game
 @export var fast_close := true
 
+@onready var player = $Player
+@onready var stdbClient = $Spacetime_Client
+var playerMap: Dictionary = {}
+
+var username: String
+var localPlayerId: int
+var remotePlayer: PackedScene = preload("res://remote_player.tscn")
 
 func _ready() -> void:
 	if !OS.is_debug_build():
@@ -15,6 +22,14 @@ func _ready() -> void:
 		print("** 'Esc' to close 'Shift + F1' to release mouse **")
 	set_process_input(fast_close)
 
+	self.username = generate_username()
+	print("username: %s" % [self.username])
+
+	stdbClient.connect("websocket_open", _on_stdb_socket_open)
+	stdbClient.connect("websocket_closed", _on_stdb_socket_closed)
+	stdbClient.connect("initial_subscription", _on_stdb_initial_subscription)
+	stdbClient.connect("transaction_update", _on_stdb_transaction_update)
+	stdbClient.connect("identity_token", _on_stdb_identity_token)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -27,6 +42,9 @@ func _input(event: InputEvent) -> void:
 			Input.MOUSE_MODE_VISIBLE:
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
+func _process(_delta: float) -> void:
+	pass
+	sync_player()
 
 # Capture mouse if clicked on the game, needed for HTML5
 # Called when an InputEvent hasn't been consumed by _input() or any GUI item
@@ -34,3 +52,135 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 			if event.button_index == MOUSE_BUTTON_LEFT && event.pressed:
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _on_stdb_socket_open() -> void:
+	pass
+	sync_player(true)
+	
+func _on_stdb_socket_closed() -> void:
+	pass
+
+func _on_stdb_initial_subscription(data: Dictionary) -> void:
+	pass
+	for table in data.keys():
+		if table == "Players":
+			for newPlayer in data[table].inserts:
+				insert_player(newPlayer)
+
+func _on_stdb_transaction_update(data: Dictionary) -> void:
+	pass
+	for table in data.keys():
+		if table == "Players":
+			var deleted_players: Dictionary = {}
+			var inserted_players: Dictionary = {}
+			
+			for delPlayer in data[table].deletes:
+				deleted_players[delPlayer.player_id] = delPlayer
+			for newPlayer in data[table].inserts:
+				inserted_players[newPlayer.player_id] = newPlayer
+
+			for player_id in deleted_players.keys():
+				if !inserted_players.has(player_id):
+					# actual removed player
+					delete_player(deleted_players[player_id])
+
+			for player_id in inserted_players.keys():
+				if !deleted_players.has(player_id):
+					# actual new player
+					insert_player(inserted_players[player_id])
+				else:
+					# player update
+					update_player(inserted_players[player_id])
+
+func _on_stdb_identity_token(data: Dictionary) -> void:
+	pass
+	stdbClient.subscribe()
+
+func _exit_tree() -> void:
+	set_process(false)
+	# Remove player from Spacetime DB
+	var argData = JSON.stringify([username])
+	stdbClient.callReducer("RemovePlayer", argData)
+
+	# wait a few seconds before closing
+	await get_tree().create_timer(5.0).timeout
+	stdbClient.websocket_close()
+
+func sync_player(first_time: bool=false) -> void:
+	pass
+	if !stdbClient.isSocketOpen:
+		return
+	
+	var argData = JSON.stringify([
+		username,
+		"",
+		{
+			"X": self.player.position.x,
+			"Y": self.player.position.y,
+			"Z": self.player.position.z
+		},
+		{
+			"X": self.player.rotation.x,
+			"Y": self.player.rotation.y,
+			"Z": self.player.rotation.z
+		}
+	])
+	
+	if first_time:
+		stdbClient.callReducer("UpsertPlayer", argData)
+	else:
+		stdbClient.callReducer("UpdatePlayer", argData)
+
+func insert_player(player: StdbPlayer) -> void:
+	pass
+	# ignore own player
+	if player.identity == username:
+		print("Ignoring own player.\n\tidentity: %s\n\tplayer_id: %s" % [player.identity, player.player_id])
+		return
+	playerMap[player.player_id] = player
+	# add player to scene
+	print("Adding player: %s" % [player.identity])
+	spawn_player(player)
+
+func update_player(player: StdbPlayer) -> void:
+	pass
+	playerMap[player.player_id] = player
+	print("updated player %s position: %s" % [player.identity, player.position])
+
+func delete_player(player: StdbPlayer) -> void:
+	pass
+	# remove player from scene
+	print("Removing player: %s" % [player.identity])
+	despawn_player(player)
+	playerMap.erase(player.player_id)
+
+func spawn_player(player: StdbPlayer) -> void:
+	pass
+	var newPlayerScene = remotePlayer.instantiate()
+	newPlayerScene.name = "remotePlayer_%d" % player.player_id
+	newPlayerScene.player_id = player.player_id
+	newPlayerScene.stdbClient = stdbClient
+	newPlayerScene.player = player
+	print("adding remote player to scene: %s" % [newPlayerScene])
+	add_child(newPlayerScene)
+
+func despawn_player(player: StdbPlayer) -> void:
+	pass
+	for child in get_children():
+		if child.name == "remotePlayer_%d" % player.player_id:
+			print("removing remote player from scene: %s" % [child.name])
+			child.despawn()
+
+
+func generate_username():
+	var emojis = []
+	for codepoint in range(0x1F600, 0x1F64F + 1):
+		emojis.append(char(codepoint))
+	for codepoint in range(0x1F300, 0x1F5FF + 1):
+		emojis.append(char(codepoint))
+	for codepoint in range(0x1F900, 0x1F9FF + 1):
+		emojis.append(char(codepoint))
+	var random_emojis = []
+	for _i in range(3):
+		random_emojis.append(emojis[randi() % emojis.size()])
+	return "".join(random_emojis)
