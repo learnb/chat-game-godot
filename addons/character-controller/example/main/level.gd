@@ -15,12 +15,12 @@ var localPlayerId: int
 var remotePlayer: PackedScene = preload("res://remote_player.tscn")
 
 func _ready() -> void:
-	if !OS.is_debug_build():
-		fast_close = false
-	if fast_close:
-		print("** Fast Close enabled in the 'level.gd' script **")
-		print("** 'Esc' to close 'Shift + F1' to release mouse **")
-	set_process_input(fast_close)
+	#if !OS.is_debug_build():
+	#	fast_close = false
+	#if fast_close:
+	#	print("** Fast Close enabled in the 'level.gd' script **")
+	#	print("** 'Esc' to close 'Shift + F1' to release mouse **")
+	#set_process_input(fast_close)
 
 	self.username = generate_username()
 	print("username: %s" % [self.username])
@@ -182,5 +182,6 @@ func generate_username():
 		emojis.append(char(codepoint))
 	var random_emojis = []
 	for _i in range(3):
-		random_emojis.append(emojis[randi() % emojis.size()])
+		random_emojis.pick_random()
+		#random_emojis.append(emojis[randi() % emojis.size()])
 	return "".join(random_emojis)
