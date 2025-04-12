@@ -6,6 +6,13 @@ var player_id: int:
 	set(value):
 		player_id = value
 
+var player: Player:
+	get:
+		return player
+	set(value):
+		player = value
+		player_id = player.player_id
+
 func _ready() -> void:
 	pass
 

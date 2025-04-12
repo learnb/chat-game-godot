@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://egp41m2ubl1k"]
+[gd_scene load_steps=13 format=3 uid="uid://egp41m2ubl1k"]
 
 [ext_resource type="Script" path="res://test_4.gd" id="1_m75xf"]
 [ext_resource type="PackedScene" uid="uid://ckeuewle5watv" path="res://UI.tscn" id="2_ci0l8"]
@@ -18,14 +18,6 @@ sky_material = SubResource("ProceduralSkyMaterial_v3paj")
 background_mode = 2
 sky = SubResource("Sky_5t2sy")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uow0m"]
-shading_mode = 0
-diffuse_mode = 3
-albedo_color = Color(0.54902, 0.529412, 1, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_tp0wi"]
-material = SubResource("StandardMaterial3D_uow0m")
-
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_sm7q1"]
 points = PackedVector3Array(-50, -0.5, -50, -50, 0.5, -50, 50, -0.5, -50, -50, -0.5, 50, -50, 0.5, 50, 50, 0.5, -50, 50, -0.5, 50, 50, 0.5, 50)
 
@@ -41,9 +33,6 @@ script = ExtResource("1_m75xf")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.967652, -0.252289, 0, 0.252289, 0.967652, 0, 1.38799, 10.2858)
 environment = SubResource("Environment_hdwfq")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxMesh_tp0wi")
 
 [node name="ChatUI" parent="." instance=ExtResource("2_ci0l8")]
 

@@ -5,6 +5,7 @@ extends Node3D
 @onready var playerCharacter = $PlayerCharacter
 
 var stdbPlayer: Player = preload("res://data_models/Player.tres")
+var remotePlayer: PackedScene = preload("res://remote_player.tscn")
 
 var username: String
 var playerMap: Dictionary = {}
@@ -21,12 +22,13 @@ func _ready() -> void:
 	ChatUI.set_username(username)
 
 func _exit_tree() -> void:
+	set_process(false)
 	# Remove player from Spacetime DB
 	var argData = JSON.stringify([username])
 	stdbClient.callReducer("RemovePlayer", argData)
 	
 	# wait a few seconds
-	await get_tree().create_timer(2).timeout
+	await get_tree().create_timer(5).timeout
 
 	# Disconnect from Spacetime DB
 	stdbClient.websocket_close()
@@ -95,17 +97,29 @@ func update_player(playerData) -> void:
 func insert_player(playerData) -> void:
 	# ignore own player
 	if playerData.identity == username:
-		print("Ignoring own player. identity: %s" % [playerData.identity])
-		print("Ignoring own player. player_id: %s" % [playerData.player_id])
+		print("Ignoring own player.\n\tidentity: %s\n\tplayer_id: %s" % [playerData.identity, playerData.player_id])
 		return
 	playerMap[playerData.player_id] = playerData
 	# add player to scene
 	print("Adding player: %s" % [playerData.identity])
+	spawn_player(playerData)
 
 func delete_player(playerData) -> void:
 	# remove player from scene
 	print("Removing player: %s" % [playerData.identity])
+	despawn_player(playerData)
 	playerMap.erase(playerData.player_id)
+
+func spawn_player(playerData) -> void:
+	var newPlayerScene = remotePlayer.instantiate()
+	newPlayerScene.name = playerData.identity
+	print("adding remote player to scene: %s" % [newPlayerScene])
+	add_child(newPlayerScene)
+
+func despawn_player(playerData) -> void:
+	for child in get_children():
+		if child.name == playerData.identity:
+			child.queue_free()
 
 func sync_player() -> void:
 	if !stdbClient.isSocketOpen:
