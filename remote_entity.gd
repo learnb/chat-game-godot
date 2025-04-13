@@ -19,6 +19,9 @@ var stdbClient:
 	set(value):
 		stdbClient = value
 
+var prevPosition: Vector3
+var prevRotation: Vector3
+
 func _ready() -> void:
 	pass
 	self.position = self.entity.position
@@ -44,7 +47,12 @@ func despawn() -> void:
 func sync_entity(first_time: bool=false) -> void:
 	if !stdbClient.isSocketOpen:
 		return
+
+	if (self.position == prevPosition)	and (self.rotation == prevRotation):
+		return
 	
+	prevPosition = self.position
+	prevRotation = self.rotation
 
 	if first_time:
 		var argData = JSON.stringify([

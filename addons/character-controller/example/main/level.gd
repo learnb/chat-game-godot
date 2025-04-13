@@ -237,7 +237,7 @@ func spawn_stuff() -> void:
 	if !stdbClient.isSocketOpen:
 		return
 	
-	for index in range(0, 100):
+	for index in range(0, 3):
 		var argData = JSON.stringify([
 			"Ball",
 			{
