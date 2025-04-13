@@ -4,7 +4,7 @@ extends Node3D
 @onready var stdbClient = $Spacetime_Client
 @onready var playerCharacter = $PlayerCharacter
 
-var stdbPlayer: Player = preload("res://data_models/Player.tres")
+var stdbPlayer: StdbPlayer = preload("res://data_models/Player.tres")
 var remotePlayer: PackedScene = preload("res://remote_player.tscn")
 
 var username: String

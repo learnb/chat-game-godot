@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="Player" load_steps=2 format=3 uid="uid://bki60vl2nlif4"]
+[gd_resource type="Resource" script_class="StdbPlayer" load_steps=2 format=3 uid="uid://bki60vl2nlif4"]
 
-[ext_resource type="Script" path="res://data_models/Player.gd" id="1_y7dy4"]
+[ext_resource type="Script" uid="uid://4em5oxa4j8x" path="res://data_models/Player.gd" id="1_y7dy4"]
 
 [resource]
 script = ExtResource("1_y7dy4")

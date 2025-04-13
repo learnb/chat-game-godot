@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ckeuewle5watv"]
 
-[ext_resource type="Script" path="res://ui.gd" id="1_f50eq"]
+[ext_resource type="Script" uid="uid://bo1wpa3arp21j" path="res://ui.gd" id="1_f50eq"]
 
 [node name="ChatUI" type="Control"]
 layout_mode = 3

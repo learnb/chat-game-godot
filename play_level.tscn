@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://doapx7bvxh5x0"]
 
-[ext_resource type="Script" path="res://play_level.gd" id="1_iujbn"]
+[ext_resource type="Script" uid="uid://dfcs16xivdje8" path="res://play_level.gd" id="1_iujbn"]
 [ext_resource type="Material" uid="uid://dsi3sgddoovok" path="res://noise_shader_material.tres" id="2_ycj3a"]
 [ext_resource type="PackedScene" uid="uid://ciu2qgckgu5sr" path="res://addons/character-controller/core/controller.tscn" id="3_u3mnk"]
 [ext_resource type="Environment" uid="uid://cyapqat2n27ix" path="res://world_env.tres" id="3_v1bke"]
