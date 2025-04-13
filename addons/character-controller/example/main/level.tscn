@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://c2t6smyr8xtty"]
+[gd_scene load_steps=41 format=3 uid="uid://c2t6smyr8xtty"]
 
 [ext_resource type="Script" uid="uid://bmy13ib0322y" path="res://addons/character-controller/example/main/level.gd" id="1_cikgd"]
 [ext_resource type="PackedScene" uid="uid://2oxdgu03lnbk" path="res://addons/character-controller/example/main/player.tscn" id="2_nvo2f"]
@@ -81,6 +81,18 @@ ambient_light_color = Color(1, 1, 1, 1)
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_m6qci"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ylyjp"]
+albedo_texture = SubResource("NoiseTexture2D_m6qci")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_m6qci"]
+
+[sub_resource type="VoxelGeneratorNoise" id="VoxelGeneratorNoise_ylyjp"]
+noise = SubResource("FastNoiseLite_m6qci")
+
+[sub_resource type="VoxelMesherTransvoxel" id="VoxelMesherTransvoxel_rftpn"]
+
 [node name="Level" type="Node3D"]
 script = ExtResource("1_cikgd")
 
@@ -124,6 +136,8 @@ material_override = ExtResource("3_7vb8p")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 6, 13)
 
 [node name="Camera3D" type="Camera3D" parent="Player/Head/FirstPersonCameraReference" index="0"]
+
+[node name="VoxelViewer" type="VoxelViewer" parent="Player"]
 
 [node name="Area3D" parent="." instance=ExtResource("3_ebamq")]
 transform = Transform3D(0.491574, 0, 0, 0, 1, 0, 0, 0, 0.555284, 0, -3, 5.93584)
@@ -474,5 +488,11 @@ directional_shadow_max_distance = 250.0
 host_url = "wss://spacetime.bryanlearn.com"
 database_name = "chat-game-dev"
 table_schemas = Array[Resource]([ExtResource("14_yjt4m"), ExtResource("14_g0g2a"), ExtResource("16_n5o4t")])
+
+[node name="VoxelLodTerrain" type="VoxelLodTerrain" parent="."]
+material = SubResource("StandardMaterial3D_ylyjp")
+generator = SubResource("VoxelGeneratorNoise_ylyjp")
+mesher = SubResource("VoxelMesherTransvoxel_rftpn")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -20.4168, 0)
 
 [editable path="Player"]
