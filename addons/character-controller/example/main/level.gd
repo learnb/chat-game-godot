@@ -5,9 +5,12 @@ extends Node3D
 
 ## If true, Esc key quit game
 @export var fast_close := true
-
+@onready var voxelTerrain = $VoxelLodTerrain
 @onready var player = $Player
 @onready var stdbClient = $Spacetime_Client
+
+var voxelTool: VoxelTool
+
 var playerMap: Dictionary = {}
 var entityMap: Dictionary = {}
 
@@ -23,7 +26,7 @@ func _ready() -> void:
 	#	print("** Fast Close enabled in the 'level.gd' script **")
 	#	print("** 'Esc' to close 'Shift + F1' to release mouse **")
 	#set_process_input(fast_close)
-
+	self.voxelTool = voxelTerrain.get_voxel_tool()
 	self.username = generate_username()
 	print("username: %s" % [self.username])
 

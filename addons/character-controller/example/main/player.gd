@@ -23,13 +23,19 @@ class_name Player
 @export var input_fly_mode_action_name := "move_fly_mode"
 
 @export var underwater_env: Environment
+@onready var voxelTerrain: VoxelLodTerrain = $"../VoxelLodTerrain"
+@onready var voxel_tool_target: Marker3D = $VoxelToolTarget
 
+
+var voxelTool: VoxelTool
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	setup()
 	#emerged.connect(_on_controller_emerged.bind())
 	#submerged.connect(_on_controller_subemerged.bind())
+
+	voxelTool = voxelTerrain.get_voxel_tool()
 
 
 func _physics_process(delta):
@@ -45,6 +51,12 @@ func _physics_process(delta):
 		var input_swim_down = Input.is_action_pressed(input_crouch_action_name)
 		var input_swim_up = Input.is_action_pressed(input_jump_action_name)
 		move(delta, input_axis, input_jump, input_crouch, input_sprint, input_swim_down, input_swim_up)
+		var input_dig = Input.is_action_pressed("action_dig")
+		var switch_dig_mode = Input.is_action_just_pressed("action_switch")
+		if switch_dig_mode:
+			switch_dig_mode()
+		if input_dig:
+			dig()
 	else:
 		# NOTE: It is important to always call move() even if we have no inputs 
 		## to process, as we still need to calculate gravity and collisions.
@@ -55,6 +67,17 @@ func _input(event: InputEvent) -> void:
 	# Mouse look (only if the mouse is captured).
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_head(event.screen_relative)
+
+func dig():
+	print("[dig] as %s" % [voxel_tool_target.global_position])
+	voxelTool.do_sphere(voxel_tool_target.global_position, 10.0)
+
+func switch_dig_mode():
+	if switch_dig_mode:
+		if voxelTool.mode == voxelTool.MODE_ADD:
+			voxelTool.mode = VoxelTool.MODE_REMOVE
+		else:
+			voxelTool.mode = VoxelTool.MODE_ADD
 
 
 #func _on_controller_emerged():
