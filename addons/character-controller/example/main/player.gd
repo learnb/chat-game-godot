@@ -31,9 +31,6 @@ class_name Player
 var dig_size: float
 
 var voxelTool: VoxelTool
-var debugLineMesh: ImmediateMesh
-#var debug_material : ORMMaterial3D
-var debug_material : StandardMaterial3D
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -44,35 +41,9 @@ func _ready():
 	voxelTool = voxelTerrain.get_voxel_tool()
 	voxelTool.mode = VoxelTool.MODE_ADD
 	dig_size = 0.5
-
-	voxel_tool_ray_cast.debug_shape_custom_color = Color.GREEN
-	voxel_tool_ray_cast.debug_shape_thickness = 3.0
 	
-	debugLineMesh = ImmediateMesh.new()
-	#debug_material = ORMMaterial3D.new()
-	debug_material = StandardMaterial3D.new()
-	#debug_material = preload("res://debug_material.tres")
-	#debug_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	#debug_material.albedo_color = Color.GREEN
 
 func _process(_delta: float) -> void:
-	pass
-	draw_debug_line()
-
-func draw_debug_line() -> void:
-	#var startPoint = self.global_position
-	#var endPoint = voxel_tool_target.global_position
-	#print("[debug draw] line(%s, %s)" % [startPoint, endPoint])
-
-	##DebugDraw3D.draw_line(startPoint, endPoint, Color.GREEN)
-	#debugLineMesh.clear_surfaces()
-	#debugLineMesh.surface_begin(Mesh.PRIMITIVE_LINES, debug_material)
-	##debugLineMesh.surface_set_color(debug_material.albedo_color)
-	#debugLineMesh.surface_add_vertex(startPoint)
-	##debugLineMesh.surface_set_color(debug_material.albedo_color)
-	#debugLineMesh.surface_add_vertex(endPoint)
-	#debugLineMesh.surface_end()
-
 	pass
 
 
@@ -119,18 +90,21 @@ func _input(event: InputEvent) -> void:
 
 func update_tool_target():
 	var mouse_pos = get_mouse_position_in_global_space()
-	get_mouse_position_in_global_space_collision()
-	#var mouse_pos_collide = get_mouse_position_in_global_space_collision()
-	#print("mouse pos [g]: %s" % [mouse_pos])
-	#print("mouse pos [c]: %s" % [mouse_pos_collide])
-	#voxel_tool_target.global_position = mouse_pos_collide
-	
 	voxel_tool_target.global_position = mouse_pos
+	
+	voxel_tool_ray_cast.target_position = voxel_tool_target.position
+	
+	
 
 
 func dig():
 	print("[dig] at %s" % [voxel_tool_target.global_position])
-	voxelTool.do_sphere(voxel_tool_target.global_position, dig_size)
+	var target: Vector3 = voxel_tool_target.global_position
+	if voxelTool.mode == voxelTool.MODE_REMOVE:
+		if voxel_tool_ray_cast.is_colliding():
+			target = voxel_tool_ray_cast.get_collision_point()
+	#voxelTool.do_sphere(voxel_tool_target.global_position, dig_size)
+	voxelTool.do_sphere(target, dig_size)
 	
 	#print("[dig] at (%s), (%s)" % [self.global_position, voxel_tool_target.global_position])
 	#voxelTool.do_path([self.global_position, voxel_tool_target.global_position], [dig_size, dig_size])
@@ -151,12 +125,15 @@ func get_mouse_position_in_global_space():
 	return ray_origin + ray_normal * 10.0
 
 func get_mouse_position_in_global_space_collision():
-	var mouse_position = get_viewport().get_mouse_position()
 	voxel_tool_ray_cast.target_position = get_mouse_position_in_global_space()
 	voxel_tool_ray_cast.force_raycast_update()
 	if voxel_tool_ray_cast.is_colliding():
 		return voxel_tool_ray_cast.get_collision_point()
 	return voxel_tool_ray_cast.target_position
+
+func update_target_with_collison():
+	pass
+	
 
 #func _on_controller_emerged():
 	#camera.environment = null
