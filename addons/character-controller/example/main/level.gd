@@ -101,7 +101,7 @@ func _on_stdb_transaction_update(data: Dictionary) -> void:
 					# player update
 					update_player(inserted_players[player_id])
 		if table == "Entities":
-			print("Entity update")
+			#print("Entity update")
 			var deleted_entities: Dictionary = {}
 			var inserted_entities: Dictionary = {}
 			
