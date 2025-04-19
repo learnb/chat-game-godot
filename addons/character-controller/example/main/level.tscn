@@ -153,6 +153,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 15.8073, 18.8235
 [node name="VoxelToolTarget" type="Marker3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275807, -13.5095)
 
+[node name="VoxelToolRayCast" type="RayCast3D" parent="Player"]
+target_position = Vector3(0, -10, 0)
+
 [node name="Area3D" parent="." instance=ExtResource("3_ebamq")]
 transform = Transform3D(0.491574, 0, 0, 0, 1, 0, 0, 0, 0.555284, 0, -3, 5.93584)
 

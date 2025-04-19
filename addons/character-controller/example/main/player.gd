@@ -25,6 +25,9 @@ class_name Player
 @export var underwater_env: Environment
 @onready var voxelTerrain: VoxelLodTerrain = $"../VoxelLodTerrain"
 @onready var voxel_tool_target: Marker3D = $VoxelToolTarget
+#@onready var voxel_tool_ray_cast: RayCast3D = $VoxelToolRayCast
+#@onready var voxel_tool_ray_cast: RayCast3D = $Head/FirstPersonCameraReference/Camera3D/VoxelToolRayCast
+@onready var camera_3d: Camera3D = $Head/FirstPersonCameraReference/Camera3D
 
 
 var voxelTool: VoxelTool
@@ -68,6 +71,12 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotate_head(event.screen_relative)
 
+	# Get mouse position from screen space to global space (projection)
+
+	if event is InputEventMouseMotion:
+		# Adjust voxel tool target position
+		voxel_tool_target.global_position = get_mouse_position_in_global_space(event)
+
 func dig():
 	print("[dig] as %s" % [voxel_tool_target.global_position])
 	voxelTool.do_sphere(voxel_tool_target.global_position, 10.0)
@@ -79,6 +88,14 @@ func switch_dig_mode():
 		else:
 			voxelTool.mode = VoxelTool.MODE_ADD
 
+func get_mouse_position_in_global_space(event: InputEvent):
+	pass
+	var mouse_position = get_viewport().get_mouse_position()
+	#var camera = get_node("/root/Node3D/Camera")  # Replace with your camera node
+	#var mouse_position = get_viewport().get_mouse_position()
+	var ray_origin = camera_3d.project_ray_origin(mouse_position)
+	var ray_normal = camera_3d.project_ray_normal(mouse_position)
+	return ray_origin + ray_normal * 10.0
 
 #func _on_controller_emerged():
 	#camera.environment = null
