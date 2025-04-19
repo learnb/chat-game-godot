@@ -60,6 +60,7 @@ func _physics_process(delta):
 		var input_swim_down = Input.is_action_pressed(input_crouch_action_name)
 		var input_swim_up = Input.is_action_pressed(input_jump_action_name)
 		move(delta, input_axis, input_jump, input_crouch, input_sprint, input_swim_down, input_swim_up)
+		#var input_dig = Input.is_action_pressed("action_dig")
 		var input_dig = Input.is_action_pressed("action_dig")
 		var switch_dig_mode = Input.is_action_just_pressed("action_switch")
 		if switch_dig_mode:
