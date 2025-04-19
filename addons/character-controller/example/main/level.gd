@@ -26,6 +26,8 @@ func _ready() -> void:
 	#	print("** Fast Close enabled in the 'level.gd' script **")
 	#	print("** 'Esc' to close 'Shift + F1' to release mouse **")
 	#set_process_input(fast_close)
+	voxelTerrain.stream = VoxelStreamSQLite.new()
+	voxelTerrain.stream.database_path = "res://voxel_db/voxel.db"
 	self.voxelTool = voxelTerrain.get_voxel_tool()
 	self.username = generate_username()
 	print("username: %s" % [self.username])
@@ -129,10 +131,14 @@ func _on_stdb_identity_token(data: Dictionary) -> void:
 
 func _exit_tree() -> void:
 	set_process(false)
+	
 	# Remove player from Spacetime DB
 	var argData = JSON.stringify([username])
 	stdbClient.callReducer("RemovePlayer", argData)
-
+	
+	# save voxel data
+	voxelTerrain.save_modified_blocks()
+	
 	# wait a few seconds before closing
 	await get_tree().create_timer(5.0).timeout
 	stdbClient.websocket_close()
