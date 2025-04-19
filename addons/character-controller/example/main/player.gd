@@ -28,7 +28,7 @@ class_name Player
 @onready var voxel_tool_ray_cast: RayCast3D = $VoxelToolRayCast
 #@onready var voxel_tool_ray_cast: RayCast3D = $Head/FirstPersonCameraReference/Camera3D/VoxelToolRayCast
 @onready var camera_3d: Camera3D = $Head/FirstPersonCameraReference/Camera3D
-var dig_size: float
+@export var dig_size: float
 
 var voxelTool: VoxelTool
 
@@ -40,7 +40,6 @@ func _ready():
 
 	voxelTool = voxelTerrain.get_voxel_tool()
 	voxelTool.mode = VoxelTool.MODE_ADD
-	dig_size = 0.5
 	
 
 func _process(_delta: float) -> void:
@@ -114,10 +113,8 @@ func switch_dig_mode():
 	if switch_dig_mode:
 		if voxelTool.mode == voxelTool.MODE_ADD:
 			voxelTool.mode = VoxelTool.MODE_REMOVE
-			dig_size = 3.0
 		elif voxelTool.mode == voxelTool.MODE_REMOVE:
 			voxelTool.mode = VoxelTool.MODE_ADD
-			dig_size = 5.0
 
 func get_mouse_position_in_global_space():
 	var mouse_position = get_viewport().get_mouse_position()

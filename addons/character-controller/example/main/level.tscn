@@ -145,6 +145,7 @@ material_override = ExtResource("3_7vb8p")
 
 [node name="Player" parent="." instance=ExtResource("2_nvo2f")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.62268e-06, 15.8073, 18.8235)
+dig_size = 5.0
 
 [node name="Camera3D" type="Camera3D" parent="Player/Head/FirstPersonCameraReference" index="0"]
 
